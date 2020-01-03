@@ -57,7 +57,7 @@ class App extends React.Component {
               return (
                 <NotePageNav {...selectedFolder} />
                 // Line 58 is the exact same thing as line 60 without the spread operator (...)
-                // <NotePageNav id={selectedFolder.id} id={selectedFolder.name} />
+                // <NotePageNav id={selectedFolder.id} name={selectedFolder.name} />
               )
             }}
           />
