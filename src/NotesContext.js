@@ -8,3 +8,5 @@ const NotesContext = React.createContext({
   notes: [],
   folders: []
 })
+
+export default NotesContext;
