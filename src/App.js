@@ -17,27 +17,31 @@ class App extends React.Component {
     folders: []
   };
 
+  //componentDidMount fires when the component renders for the first time
   componentDidMount() {
+
+      // send two requests to the API, one for notes, and one for folders
       Promise.all([
           fetch(`${config.API_ENDPOINT}/notes`),
           fetch(`${config.API_ENDPOINT}/folders`)
       ])
-          .then(([notesRes, foldersRes]) => {
-              if (!notesRes.ok)
-                  return notesRes.json().then(e => Promise.reject(e));
-              if (!foldersRes.ok)
-                  return foldersRes.json().then(e => Promise.reject(e));
+      .then(([notesRes, foldersRes]) => {
+          if (!notesRes.ok)
+              return notesRes.json().then(e => Promise.reject(e));
+          if (!foldersRes.ok)
+              return foldersRes.json().then(e => Promise.reject(e));
 
-              return Promise.all([notesRes.json(), foldersRes.json()]);
-          })
-          .then(([notes, folders]) => {
-              this.setState({notes, folders});
-          })
-          .catch(error => {
-              console.error({error});
-          });
+          return Promise.all([notesRes.json(), foldersRes.json()]);
+      })
+      .then(([notes, folders]) => {
+          this.setState({notes, folders});
+      })
+      .catch(error => {
+          console.error({error});
+      });
   }
 
+  // The callback prop used to remove the note from the array in state
   handleDeleteNote = noteId => {
     this.setState({
         notes: this.state.notes.filter(note => note.id !== noteId)
@@ -54,6 +58,11 @@ class App extends React.Component {
 
     return (
       <div className="App">
+
+        {/*
+          Override the default values in NotesContext.js with the items set
+          above in 'contextValue'
+        */}
         <NotesContext.Provider value={contextValue}>
           <header className="App-header">
             <h1><Link to={'/'}>Noteful</Link></h1>
