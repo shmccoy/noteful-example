@@ -7,15 +7,49 @@ import NotePageMain from './NotePageMain/NotePageMain'
 import NotePageNav from './NotePageNav/NotePageNav'
 import { Route, Switch, Link } from 'react-router-dom';
 import NotesContext from './NotesContext'
+import config from './config'
 
 
 class App extends React.Component {
-  state = STORE
+
+  state = {
+    notes: [],
+    folders: []
+  };
+
+  componentDidMount() {
+      Promise.all([
+          fetch(`${config.API_ENDPOINT}/notes`),
+          fetch(`${config.API_ENDPOINT}/folders`)
+      ])
+          .then(([notesRes, foldersRes]) => {
+              if (!notesRes.ok)
+                  return notesRes.json().then(e => Promise.reject(e));
+              if (!foldersRes.ok)
+                  return foldersRes.json().then(e => Promise.reject(e));
+
+              return Promise.all([notesRes.json(), foldersRes.json()]);
+          })
+          .then(([notes, folders]) => {
+              this.setState({notes, folders});
+          })
+          .catch(error => {
+              console.error({error});
+          });
+  }
+
+  handleDeleteNote = noteId => {
+    this.setState({
+        notes: this.state.notes.filter(note => note.id !== noteId)
+    });
+  };
+
   render() {
 
     const contextValue = {
       notes: this.state.notes,
-      folders: this.state.folders
+      folders: this.state.folders,
+      deleteNote: this.handleDeleteNote
     }
 
     return (

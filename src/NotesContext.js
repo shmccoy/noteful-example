@@ -6,7 +6,10 @@ const NotesContext = React.createContext({
   will be updated after api requests complete
   */
   notes: [],
-  folders: []
+  folders: [],
+  addFolder: () => {},
+  addNote: () => {},
+  deleteNote: () => {},
 })
 
 export default NotesContext;
