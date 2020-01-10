@@ -1,18 +1,28 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import Note from '../Note/Note';
+import React from 'react'
+import Note from '../Note/Note'
+import './NotePageMain.css'
 
-class NotePageMain extends React.Component {
-
-  render() {
-    return (
-      <div className="Main">
-        <Note modified={this.props.modified} id={this.props.id } name={this.props.name} />
-        <p>{this.props.content}</p>
+export default function NotePageMain(props) {
+  return (
+    <section className='NotePageMain'>
+      <Note
+        id={props.note.id}
+        name={props.note.name}
+        modified={props.note.modified}
+        history={props.history}
+        match={props.match}
+      />
+      <div className='NotePageMain__content'>
+        {props.note.content.split(/\n \r|\n/).map((para, i) =>
+          <p key={i}>{para}</p>
+        )}
       </div>
-    );
-  }
-
+    </section>
+  )
 }
 
-export default NotePageMain;
+NotePageMain.defaultProps = {
+  note: {
+    content: '',
+  }
+}

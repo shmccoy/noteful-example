@@ -1,39 +1,71 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, {Component} from 'react'
+import { Link } from 'react-router-dom'
+import { format } from 'date-fns'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import './Note.css'
+import NotesContext from '../NotesContext';
 
-// Found this on stack overflow: https://stackoverflow.com/questions/3552461/how-to-format-a-javascript-date
-function formatDate(date) {
-  var monthNames = [
-    "January", "February", "March",
-    "April", "May", "June", "July",
-    "August", "September", "October",
-    "November", "December"
-  ];
 
-  var day = date.getDate();
-  var monthIndex = date.getMonth();
-  var year = date.getFullYear();
 
-  return monthNames[monthIndex] + ' ' + day + ', ' + year;
-}
+class Note extends Component {
+  deleteRequest = (noteId, callback) => {
+    fetch(`http://localhost:9090/notes/${noteId}`, {
+      method: 'DELETE',
+      headers: {
+        'content-type': 'application/json'
+      }})
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(error => {
+            throw error
+          })
+        }
+        return res.json()
+      })
+      .then(res => callback(noteId))
+      .catch(error => {
+        console.log((error.message))
+      })
+  }  
 
-class Note extends React.Component {
 
-  render() {
-    const modified = formatDate(new Date(this.props.modified));
-    console.log(modified)
-    return (
-      <li className="Note">
-        <Link to={`/notes/${this.props.id}`}>{this.props.name}</Link>
-        <div>
-          <p>Last modified: {modified}</p>
-
-          <button>Delete Note</button>
+  render(){
+    console.log(this.props.match.path)
+  return (
+    <NotesContext.Consumer>
+       {(context) => (
+        <div className='Note'>
+          <h2 className='Note__title'>
+            <Link to={`/note/${this.props.id}`}>
+              {this.props.name}
+            </Link>
+          </h2>
+          <button className='Note__delete' type='button'
+          onClick={() => {
+            this.deleteRequest(this.props.id,context.deleteNote);
+            if(this.props.match.path === "/note/:noteId"){
+              this.props.history.push('/')
+            }
+          }}
+          >
+            <FontAwesomeIcon icon='trash-alt' />
+            {' '}
+            remove
+          </button>
+          <div className='Note__dates'>
+            <div className='Note__dates-modified'>
+              Modified
+              {' '}
+              <span className='Date'>
+                {format(this.props.modified, 'Do MMM YYYY')}
+              </span>
+            </div>
+          </div>
         </div>
-      </li>
-    );
-  }
-
+       )}
+    </NotesContext.Consumer>
+  )
+}
 }
 
-export default Note;
+export default Note

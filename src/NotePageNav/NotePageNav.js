@@ -1,18 +1,35 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, {Component} from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import CircleButton from '../CircleButton/CircleButton'
+import NotesContext from '../NotesContext'
+import './NotePageNav.css'
 
-class NotePageNav extends React.Component {
+class NotePageNav extends Component {
+
+  static contextType = NotesContext
 
   render() {
-    console.log(this.props)
+    const {folders} = this.context
     return (
-      <div className="Sidebar">
-        <Link to='/'>Go Back</Link>
-        <h2>Current Folder: {this.props.name}</h2>
+      <div className='NotePageNav'>
+        <CircleButton
+          tag='button'
+          role='link'
+          onClick={() => this.props.history.goBack()}
+          className='NotePageNav__back-button'
+        >
+          <FontAwesomeIcon icon='chevron-left' />
+          <br />
+          Back
+        </CircleButton>
+        {folders && (
+          <h3 className='NotePageNav__folder-name'>
+            {folders.name}
+          </h3>
+        )}
       </div>
-    );
-  }
-
+    )
+      }
 }
 
-export default NotePageNav;
+export default NotePageNav

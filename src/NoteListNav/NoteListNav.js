@@ -1,43 +1,49 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, {Component} from 'react'
+import { NavLink, Link } from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import CircleButton from '../CircleButton/CircleButton'
+import { countNotesForFolder } from '../notes-helpers'
+import NotesContext from '../NotesContext';
+import './NoteListNav.css'
 
-// This component is rendered in the sidebar for the '/' and 'folder/:folderId' routes
-class NoteListNav extends React.Component {
+class NoteListNav extends Component {
+  
+  static contextType = NotesContext
 
-  render() {
+  render(){
+    const {notes, folders} = this.context;
     return (
-      <div className="Sidebar">
-        <h2>Folders</h2>
-        <ul>
-
-          {/* Loop through the array of folders passed as a prop */}
-          {this.props.folders.map((folder) => {
-
-            /* for each folder in the array, set variable 'classes' as either
-            'folder' or 'folder' AND 'selected'. If the selected folderId is
-            the same as the id of the current folder in the array, then add 'selected' to classes
-            */
-            const classes = this.props.selected === folder.id
-              ? 'folder selected'
-              : 'folder'
-
-            // Create list item for each folder in the array
-            return(
-
-              <li key={folder.id}>
-                <Link className={classes} to={`/folders/${folder.id}`}>{folder.name}</Link>
-              </li>
-            )
-          })}
+      <div className='NoteListNav'>
+        <ul className='NoteListNav__list'>
+          {folders.map(folder =>
+            <li key={folder.id}>
+              <NavLink
+                className='NoteListNav__folder-link'
+                to={`/folder/${folder.id}`}
+              >
+                <span className='NoteListNav__num-notes'>
+                  {countNotesForFolder(notes, folder.id)}
+                </span>
+                {folder.name}
+              </NavLink>
+            </li>
+          )}
         </ul>
-        <button>New Folders</button>
+        <div className='NoteListNav__button-wrapper'>
+          <CircleButton
+            tag={Link}
+            to='/add-folder'
+            type='button'
+            className='NoteListNav__add-folder-button'
+          >
+            <FontAwesomeIcon icon='plus' />
+            <br />
+            Folder
+          </CircleButton>
+        </div>
       </div>
-    );
+    )
   }
 }
 
-NoteListNav.defaultProps = {
-  folders: []
-}
-
-export default NoteListNav;
+export default NoteListNav

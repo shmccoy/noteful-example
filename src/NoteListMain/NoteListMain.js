@@ -1,28 +1,65 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import Note from '../Note/Note';
+import React, {Component} from 'react'
+import { Link } from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Note from '../Note/Note'
+import CircleButton from '../CircleButton/CircleButton'
+import './NoteListMain.css'
+import NotesContext from '../NotesContext';
 
-class NoteListMain extends React.Component {
+class NoteListMain extends Component {
 
-  render() {
+  static contextType = NotesContext
+  render(){
+    const {notes} = this.context;
+    const folderId = this.props.match.params.folderId
+
+    const notesInFolder = notes.filter((note) => 
+    {if(folderId){
+     return  note.folderId === folderId
+    } else{
+      return note
+    }}
+  );
+
+
     return (
-      <div className="Main">
-        <h2>Notes</h2>
+
+      !this.props.err ?
+
+      <section className='NoteListMain'>
         <ul>
-          {this.props.notes.map((note) => {
-            return (
-              <Note modified={note.modified} key={note.id} id={note.id } name={note.name} />
-            )
-          })}
+          {notesInFolder.map(note =>
+            <li key={note.id}>
+              <Note
+                id={note.id}
+                name={note.name}
+                modified={note.modified}
+                history={this.props.history}
+                match={this.props.match}
+              />
+            </li>
+          )}
         </ul>
-        <button>New Note</button>
-      </div>
-    );
+        <div className='NoteListMain__button-container'>
+          <CircleButton
+            tag={Link}
+            to='/add-note'
+            type='button'
+            className='NoteListMain__add-note-button'
+          >
+            <FontAwesomeIcon icon='plus' />
+            <br />
+            Note
+          </CircleButton>
+        </div>
+      </section>
+
+      :
+      
+      <h3>{this.props.error}</h3>
+    )
   }
 }
 
-NoteListMain.defaultProps = {
-  notes: []
-}
-
 export default NoteListMain;
+
