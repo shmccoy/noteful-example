@@ -1,86 +1,111 @@
-import React, { Component } from 'react';
-import ValiationError from './ValidationError';
-import NotesContext from '../NotesContext';
+import React from 'react';
+import ValidationError from '../ValidationError';
+import config from '../config';
+import NotefulContext from '../NotefulContext';
+import NotefulError from '../NotefulError';
+import './AddFolder.css';
 
-export default class AddFolder extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {   
-      name: '',
-      folderValid: false,
-      validMessage: ''
-    }
-  }
-  
-  static contextType = NotesContext;
-
-  updateFolder(name) {
-    this.setState( {name: name}, () => {this.validateFolder(name)} )
-  }
-
-  validateFolder(inputValue) {
-    let errorMsg = this.state.validMessage;
-    let hasError = false;
-
-    inputValue = inputValue.trim();
-    if (inputValue.length === 0) {
-      errorMsg = 'Folder Name is required';
-      hasError = true;
-
-    } else if (inputValue.length < 3) {
-      errorMsg = 'Folder Name must be at least 3 characters';
-      hasError = true;
-
-    } else {
-      errorMsg = '';
-      hasError = false;
+export default class AddFolder extends React.Component {
+    static contextType = NotefulContext; 
+    constructor(props) {
+        super(props);
+        this.state = {
+            name: {
+              value: '',
+              touched: false
+            },
+            id: '',
+            // error: null,
+        };
     }
 
-    this.setState({
-      validMessage: errorMsg,
-      folderValid: !hasError
-    })
-
-  }
-
-  addFolderRequest(name, addFolder) {
-    fetch(`http://localhost:9090/folders`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({name: name})
-    })
-    .then(res => {
-      if (!res.ok) {
-        throw new Error('Unable to add folder to database')
-      }
-      return res.json();
-    })
-    .then(res => addFolder(res))
-    .catch(err => console.log(name, err))
-  }
-
-  render() {
-    console.log(this.props)
-
-    const { addFolder } = this.context
-
-    this.handleSubmit = (event) => {
-      event.preventDefault();
-      console.log(addFolder)
-      this.addFolderRequest(this.state.name, addFolder);
+    updateName(name) {
+        this.setState({name: {value: name, touched: true}});
+    }
+    
+    createFolderId() {
+            let min = 100000;
+            let max = 1000000;
+            let folderId = Math.floor(Math.random() * (max - min + 1) + min);
+            this.setState({id: folderId});
     }
 
-    return (
-      <form onSubmit={ (e) => this.handleSubmit(e) }>
-        <label>Add Folder: 
-          <input onChange={ (e) => this.updateFolder(e.target.value) } type="text" name="addFolder" id="addFolder"></input>
-        </label>
-        <ValiationError hasError={!this.state.folderValid} message={this.state.validMessage}/>
-        <button type="submit" disabled={!this.state.folderValid}>Submit</button>
-      </form>
-    )
-  }
+    handleSubmit(event) {
+        event.preventDefault();
+        const folder = {
+            id: this.state.id,
+            name: this.state.name.value
+        }
+        const url = config.API_ENDPOINT + '/folders';
+        console.log(url)
+        // this.setState({ error: null })
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(folder)
+        })
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(error => {
+                    throw error
+                })
+            }
+            return res.json()
+        })
+        .then(data => {
+            this.setState({
+                name: {value: ''},
+                id: ''
+            })
+            this.context.addFolder(data)
+            console.log(this.context);
+            this.props.history.push('/')
+        })
+    }
 
+    validateName() {
+        const name = this.state.name.value.trim();
+        if (name.length === 0) {
+          return 'Name is required';
+        } 
+        else if (name.length < 3) {
+          return 'Name must be at least 3 characters long';
+        }
+    }
+    
+    render() {
+        const nameError = this.validateName();
+        return (
+            <form className = "newFolder"
+                onSubmit = {(e) => this.handleSubmit(e)}>
+                <NotefulError>
+                    <h2>Create a new folder!</h2>
+                    <div className="folderCreation__hint">* required field</div>
+                    <label htmlFor="name">Folder Name *</label> 
+                    <input 
+                        type = "text" 
+                        className = "folderCreation"
+                        name = "name" 
+                        id = "name" 
+                        onChange = {e => this.updateName(e.target.value)}/>
+                    {this.state.name.touched && (
+                        <ValidationError message = {nameError}/>
+                    )}
+                    <button
+                        type = "submit"
+                        className = "folderCreation_button"
+                        style = {this.state.name.touched ? {"cursor": "pointer"} : {"cursor": "not-allowed"}}
+                        disabled = {
+                            this.validateName() 
+                        }
+                        >
+                        Create Folder
+                    </button>
+                </NotefulError>
+            </form>
+        )
+    }
 }

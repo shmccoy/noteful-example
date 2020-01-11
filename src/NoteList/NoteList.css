@@ -1,0 +1,19 @@
+
+.noteListUl {
+    list-style-type: none;
+    margin: 0;
+    padding: 10px;
+}
+
+.noteList-buttonBox {
+    max-width: 380px;
+    margin: 0 10px;
+}
+
+.noteList-addNote {
+    margin: 0 auto 20px;
+}
+.noteList-addNote:hover {
+    background-color: #29862e;
+    color: white;
+}
